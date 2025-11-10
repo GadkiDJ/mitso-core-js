@@ -18,8 +18,8 @@
  *    'Tue, 26 Jan 2016 13:48:02 GMT' => Date()
  *    'Sun, 17 May 1998 03:00:00 GMT+01' => Date()
  */
-function parseDataFromRfc2822(/* value */) {
-  throw new Error('Not implemented');
+function parseDataFromRfc2822(value) {
+  return new Date(value);
 }
 
 /**
@@ -33,8 +33,8 @@ function parseDataFromRfc2822(/* value */) {
  *    '2016-01-19T16:07:37+00:00'    => Date()
  *    '2016-01-19T08:07:37Z' => Date()
  */
-function parseDataFromIso8601(/* value */) {
-  throw new Error('Not implemented');
+function parseDataFromIso8601(value) {
+  return new Date(value);
 }
 
 /**
@@ -51,8 +51,16 @@ function parseDataFromIso8601(/* value */) {
  *    Date(2012,1,1)    => true
  *    Date(2015,1,1)    => false
  */
-function isLeapYear(/* date */) {
-  throw new Error('Not implemented');
+function isLeapYear(date) {
+  const year = date.getFullYear();
+  if (year % 400 === 0) {
+    return true;
+  } if (year % 100 === 0) {
+    return false;
+  } if (year % 4 === 0) {
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -70,8 +78,17 @@ function isLeapYear(/* date */) {
  *    Date(2000,1,1,10,0,0),  Date(2000,1,1,10,0,0,250)     => "00:00:00.250"
  *    Date(2000,1,1,10,0,0),  Date(2000,1,1,15,20,10,453)   => "05:20:10.453"
  */
-function timeSpanToString(/* startDate, endDate */) {
-  throw new Error('Not implemented');
+function timeSpanToString(startDate, endDate) {
+  const difference = endDate - startDate;
+  const hours = Math.floor(difference / 3600000);
+  const minutes = Math.floor((difference % 3600000) / 60000);
+  const seconds = Math.floor((difference % 60000) / 1000);
+  const milliseconds = difference % 1000;
+  const formHours = hours.toString().padStart(2, '0');
+  const formMinutes = minutes.toString().padStart(2, '0');
+  const formSeconds = seconds.toString().padStart(2, '0');
+  const formMS = milliseconds.toString().padStart(3, '0');
+  return `${formHours}:${formMinutes}:${formSeconds}.${formMS}`;
 }
 
 /**
@@ -90,8 +107,18 @@ function timeSpanToString(/* startDate, endDate */) {
  *    Date.UTC(2016,3,5,18, 0) => Math.PI
  *    Date.UTC(2016,3,5,21, 0) => Math.PI/2
  */
-function angleBetweenClockHands(/* date */) {
-  throw new Error('Not implemented');
+function angleBetweenClockHands(date) {
+  const inf = new Date(date);
+  const hours = inf.getUTCHours();
+  const minutes = inf.getUTCMinutes();
+  const cornerMin = minutes * 6;
+  const cornerHour = (hours % 12) * 30 + minutes * 0.5;
+  let difference = Math.abs(cornerHour - cornerMin);
+  if (difference > 180) {
+    difference = 360 - difference;
+  }
+  const number = difference * (Math.PI / 180);
+  return number;
 }
 
 /**
@@ -112,8 +139,30 @@ function angleBetweenClockHands(/* date */) {
  *    getDay(365, false) => "December, 31"
  *    getDay(366, true) => "December, 31"
  */
-function getDay(/* day, isLeap */) {
-  throw new Error('Not implemented');
+function getDay(day, isLeap) {
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+  const daysInMonths = [
+    31, 28, 31, 30,
+    31, 30, 31, 31,
+    30, 31, 30, 31,
+  ];
+
+  if (isLeap) {
+    daysInMonths[1] = 29;
+  }
+  let remDays = day;
+  let monthIndex = 0;
+  for (let i = 0; i < daysInMonths.length; i += 1) {
+    if (remDays <= daysInMonths[i]) {
+      monthIndex = i;
+      break;
+    }
+    remDays -= daysInMonths[i];
+  }
+  return `${months[monthIndex]}, ${remDays}`;
 }
 
 module.exports = {
