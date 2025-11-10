@@ -27,8 +27,18 @@
  *      .catch((error) => console.log(error.message)) // 'Error: Wrong parameter is passed!
  *                                                    //  Ask her again.';
  */
-function willYouMarryMe(/* isPositiveAnswer */) {
-  throw new Error('Not implemented');
+function willYouMarryMe(isPositiveAnswer) {
+  return new Promise((resolve, reject) => {
+    if (typeof isPositiveAnswer === 'boolean') {
+      if (isPositiveAnswer === true) {
+        resolve('Hooray!!! She said "Yes"!');
+      } else {
+        resolve('Oh no, she said "No".');
+      }
+    } else {
+      reject(new Error('Wrong parameter is passed! Ask her again.'));
+    }
+  });
 }
 
 /**
@@ -46,8 +56,10 @@ function willYouMarryMe(/* isPositiveAnswer */) {
  *    })
  *
  */
-function processAllPromises(/* array */) {
-  throw new Error('Not implemented');
+function processAllPromises(array) {
+  return Promise.all(
+    array.map((promise) => promise.catch((error) => error.message || error)),
+  );
 }
 
 /**
@@ -69,8 +81,12 @@ function processAllPromises(/* array */) {
  *    })
  *
  */
-function getFastestPromise(/* array */) {
-  throw new Error('Not implemented');
+function getFastestPromise(array) {
+  return new Promise((resolve, reject) => {
+    array.forEach((promise) => {
+      promise.then(resolve).catch(reject);
+    });
+  });
 }
 
 /**
@@ -90,8 +106,20 @@ function getFastestPromise(/* array */) {
  *    });
  *
  */
-function chainPromises(/* array, action */) {
-  throw new Error('Not implemented');
+function chainPromises(array, action) {
+  let currentPromise = array[0].catch(() => undefined);
+  for (let i = 1; i < array.length; i += 1) {
+    currentPromise = currentPromise.then((prevResult) => array[i]
+      .then((currentResult) => {
+        if (prevResult !== undefined) {
+          return action(prevResult, currentResult);
+        }
+        return currentResult;
+      })
+      .catch(() => (prevResult !== undefined ? prevResult : undefined)));
+  }
+
+  return currentPromise;
 }
 
 module.exports = {
